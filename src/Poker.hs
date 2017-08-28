@@ -3,21 +3,11 @@ module Poker where
 import Data.List
 import System.Random.Shuffle
 
--- data Card = Card { suit :: Suit
---                  , rank :: Rank
---                  } deriving (Eq, Ord)
-
 data Card = Card Rank Suit
             deriving (Eq, Ord)
 
 instance Show Card where
     show (Card suit rank) = show suit ++ " " ++ show rank
---                                  ++ case rank of
---                                       11 -> "Jack"
---                                       12 -> "Queen"
---                                       13 -> "King"
---                                       14 -> "Ace"
---                                       _  -> show rank
 
 getSuit :: Card -> Suit
 getSuit (Card _ suit) =  suit
@@ -35,13 +25,28 @@ data Rank = Two
           | Queen
           | King
           | Ace
-            deriving (Show, Eq, Ord, Enum)
+            deriving (Eq, Ord, Enum)
+
+instance Show Rank where
+    show r = case r of
+               Jack  -> "J"
+               Queen -> "Q"
+               King  -> "K"
+               Ace   -> "A"
+               _     -> (show . (+ 2) . fromEnum) r
 
 data Suit = Spade
           | Heart
           | Diamond
           | Club
-            deriving (Show, Eq, Ord, Enum)
+            deriving (Eq, Ord, Enum)
+
+instance Show Suit where
+    show s = case s of
+               Spade   -> "♠ "
+               Heart   -> "♥ "
+               Diamond -> "♦ "
+               Club    -> "♣ "
 
 initCards :: [Card]
 initCards =  do suit <- [Spade ..]
@@ -86,10 +91,10 @@ isStraightFlush :: [Card] -> Bool
 isStraightFlush cards =  isStraight cards && isFlush cards
 
 isFourOfAKind :: [Card] -> Bool
-isFourOfAKind =  undefined
+isFourOfAKind cards =  (sort . map (length) . pairs) cards == [1, 4]
 
 isFullHouse :: [Card] -> Bool
-isFullHouse =  undefined
+isFullHouse cards =  (sort . map (length) . pairs) cards == [2, 3]
 
 isFlush       :: [Card] -> Bool
 isFlush cards =  all (== head suits) suits
@@ -101,20 +106,24 @@ isStraight cards =  and $ g sorted
                     where f :: Card -> Rank
                           f (Card rank _) =  rank
                           sorted :: [Rank]
-                          sorted =  map f cards
+                          sorted =  sort $ map f cards
                           g :: [Rank] -> [Bool]
                           g [_] = []
                           g (card1 : card2 : cards) =  (succ card1 == card2) : g (card2 : cards)
 
+pairs cards =  group sorted
+               where f (Card rank _) =  rank
+                     sorted =  sort $ map f cards
 
 isThreeOfAKind :: [Card] -> Bool
-isThreeOfAKind =  undefined
+isThreeOfAKind cards =  (last . sort . map (length) . pairs) cards == 3
 
 isTwoPair :: [Card] -> Bool
-isTwoPair =  undefined
+isTwoPair cards =  (sort . map (length) . pairs) cards == [1, 2, 2]
 
 isOnePair :: [Card] -> Bool
-isOnePair =  undefined
+isOnePair cards =  (sort . map (length) . pairs) cards == [1, 1, 1, 2]
 
 getCards         :: Int -> [Card] -> ([Card], [Card])
 getCards n cards =  (take n cards, drop n cards)
+
