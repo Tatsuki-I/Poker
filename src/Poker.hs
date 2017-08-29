@@ -36,6 +36,7 @@ instance Show Rank where
                Queen -> "Q"
                King  -> "K"
                Ace   -> "A"
+               Ten   -> "T"
                _     -> (show . (+ 2) . fromEnum) r
 
 data Suit = Club
@@ -113,14 +114,17 @@ isFlush cards =  all (== head suits) suits
                        suits =  map getSuit cards
 
 isStraight :: [Card] -> Bool
-isStraight cards =  and $ g sorted
-                    where f :: Card -> Rank
-                          f (Card rank _) =  rank
-                          sorted :: [Rank]
-                          sorted =  sort $ map f cards
-                          g :: [Rank] -> [Bool]
-                          g [_] = []
-                          g (card1 : card2 : cards) =  (succ card1 == card2) : g (card2 : cards)
+isStraight cards = (and . g) (if minimum sorted == Two
+                              && maximum sorted == Ace
+                                then (-1) : (init . map fromEnum) sorted
+                                else map fromEnum sorted)
+                   where f :: Card -> Rank
+                         f (Card rank _) =  rank
+                         sorted :: [Rank]
+                         sorted =  sort $ map f cards
+                         g :: [Int] -> [Bool]
+                         g [_] = []
+                         g (card1 : card2 : cards) =  (succ card1 == card2) : g (card2 : cards)
 
 pairs cards =  group sorted
                where f (Card rank _) =  rank
