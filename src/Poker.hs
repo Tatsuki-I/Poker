@@ -1,6 +1,7 @@
 module Poker where
 
 import Data.List
+import Data.Maybe
 import System.Random.Shuffle
 
 data Card = Card Rank Suit
@@ -9,7 +10,11 @@ data Card = Card Rank Suit
 instance Show Card where
     show (Card suit rank) = show suit ++ " " ++ show rank
 
-getSuit :: Card -> Suit
+instance Enum Card where
+    fromEnum c = fromMaybe 0 $ elemIndex c (sort initCards)
+    toEnum     = ((!!) . sort) initCards
+
+getSuit               :: Card -> Suit
 getSuit (Card _ suit) =  suit
 
 data Rank = Two
@@ -27,7 +32,7 @@ data Rank = Two
           | Ace
             deriving (Eq, Ord, Enum)
 
-getRank :: Card -> Rank
+getRank               :: Card -> Rank
 getRank (Card rank _) =  rank
 
 instance Show Rank where
@@ -82,73 +87,72 @@ instance Show Hand where
                    OnePair       -> "One Pair"
                    HighCards     -> "High Cards"
 
-checkHands :: [Card] -> Hand
-checkHands cards | isRoyalStraightFlush cards = RoyalStraightFlush
-                 | isStraightFlush      cards = StraightFlush
-                 | isFourOfAKind        cards = FourOfAKind
-                 | isFullHouse          cards = FullHouse
-                 | isFlush              cards = Flush
-                 | isStraight           cards = Straight
-                 | isThreeOfAKind       cards = ThreeOfAKind
-                 | isTwoPair            cards = TwoPair
-                 | isOnePair            cards = OnePair
-                 | otherwise                  = HighCards
+checkHands       :: [Card] -> Hand
+checkHands cards |  isRoyalStraightFlush cards = RoyalStraightFlush
+                 |  isStraightFlush      cards = StraightFlush
+                 |  isFourOfAKind        cards = FourOfAKind
+                 |  isFullHouse          cards = FullHouse
+                 |  isFlush              cards = Flush
+                 |  isStraight           cards = Straight
+                 |  isThreeOfAKind       cards = ThreeOfAKind
+                 |  isTwoPair            cards = TwoPair
+                 |  isOnePair            cards = OnePair
+                 |  otherwise                  = HighCards
 
-isRoyalStraightFlush          :: [Card] -> Bool
-isRoyalStraightFlush cards =  isStraightFlush cards
-                              && (maximum ranks == Ace)
-                              && (minimum ranks == Ten)
-                              where ranks :: [Rank]
-                                    ranks =  map getRank cards
+isRoyalStraightFlush :: [Card] -> Bool
+isRoyalStraightFlush =  (&&) <$> isStraightFlush
+                             <*> (== Ten) . minimum . map getRank
 
 isStraightFlush :: [Card] -> Bool
-isStraightFlush cards =  isStraight cards && isFlush cards
+isStraightFlush =  (&&) <$> isStraight
+                        <*> isFlush
 
--- pairs       :: [Card] -> [[Rank]]
-pairs cards =  group sorted
-               where f (Card rank _) =  rank
-                     sorted =  sort $ map f cards
+pairs :: [Card] -> [[Rank]]
+pairs =  group . sort . map getRank
 
--- sortPairsLength :: [Card] -> [Int]
-sortPairsLength = sort . map length . pairs
+sortPairsLength :: [Card] -> [Int]
+sortPairsLength = sort . pairsLength
+
+pairsLength :: [Card] -> [Int]
+pairsLength = map length . pairs
 
 isFourOfAKind :: [Card] -> Bool
-isFourOfAKind cards =  sortPairsLength cards == [1, 4]
+isFourOfAKind =  (== [1, 4]) . sortPairsLength
 
 isFullHouse :: [Card] -> Bool
-isFullHouse cards =  sortPairsLength cards == [2, 3]
+isFullHouse =  (== [2, 3]) . sortPairsLength
 
-isFlush       :: [Card] -> Bool
-isFlush cards =  all (== head suits) suits
-                 where suits :: [Suit]
-                       suits =  map getSuit cards
+isFlush :: [Card] -> Bool
+isFlush =  all =<< (. getSuit) . (==) . head . map getSuit
+-- isFlush cards =  all ((== head (map getSuit cards)) . getSuit) cards
 
-isStraight :: [Card] -> Bool
-isStraight cards = (and . g) (if minimum sorted == Two
-                              && maximum sorted == Ace
-                                then (pred . fromEnum) Two : (init . map fromEnum) sorted
-                                else map fromEnum sorted)
-                   where f :: Card -> Rank
-                         f (Card rank _) =  rank
-                         sorted :: [Rank]
-                         sorted =  sort $ map f cards
-                         g :: [Int] -> [Bool]
-                         g [_] = []
-                         g (card1 : card2 : cards) =  (succ card1 == card2) : g (card2 : cards)
+isStraight    :: [Card] -> Bool
+isStraight cs =  (and . f) (if (minimum . toRankLs) cs == Two
+                            && (maximum . toRankLs) cs == Ace
+                              then (pred . fromEnum) Two
+                                   : (init . sortByRankEnum) cs
+                              else sortByRankEnum cs)
+                 where toRankLs :: [Card] -> [Rank]
+                       toRankLs =  map getRank
+                       sortByRankEnum :: [Card] -> [Int]
+                       sortByRankEnum =  map fromEnum . sort . toRankLs
+                       f                :: [Int] -> [Bool]
+                       f [_]            =  []
+                       f (x1 : x2 : xs) =  (succ x1 == x2) : f (x2 : xs)
 
 isThreeOfAKind :: [Card] -> Bool
-isThreeOfAKind cards =  (maximum . map length . pairs) cards == 3
+isThreeOfAKind =  (== 3) . maximum . pairsLength
 
 isTwoPair :: [Card] -> Bool
-isTwoPair cards =  sortPairsLength cards == [1, 2, 2]
+isTwoPair =  (== [1, 2, 2]) . sortPairsLength
 
 isOnePair :: [Card] -> Bool
-isOnePair cards =  sortPairsLength cards == [1, 1, 1, 2]
+isOnePair =  (== [1, 1, 1, 2]) . sortPairsLength
 
-getCards         :: Int -> [Card] -> ([Card], [Card])
-getCards n cards =  (take n cards, drop n cards)
+getCards :: Int -> [Card] -> ([Card], [Card])
+getCards =  splitAt
 
-comb :: Int -> [a] -> [[a]]
-comb 0 _ = [[]]
-comb _ [] = []
-comb m (x:xs) = map (x:) (comb (m-1) xs) ++ comb m xs
+comb          :: Int -> [a] -> [[a]]
+comb 0 _        =  [[]]
+comb _ []       =  []
+comb m (x : xs) =  map (x :) (comb (m - 1) xs) ++ comb m xs
