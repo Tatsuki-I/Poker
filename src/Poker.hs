@@ -95,18 +95,28 @@ checkHands cards | isRoyalStraightFlush cards = RoyalStraightFlush
                  | otherwise                  = HighCards
 
 isRoyalStraightFlush          :: [Card] -> Bool
-isRoyalStraightFlush cards =  isStraightFlush cards && (maximum ranks == Ace)
+isRoyalStraightFlush cards =  isStraightFlush cards
+                              && (maximum ranks == Ace)
+                              && (minimum ranks == Ten)
                               where ranks :: [Rank]
                                     ranks =  map getRank cards
 
 isStraightFlush :: [Card] -> Bool
 isStraightFlush cards =  isStraight cards && isFlush cards
 
+-- pairs       :: [Card] -> [[Rank]]
+pairs cards =  group sorted
+               where f (Card rank _) =  rank
+                     sorted =  sort $ map f cards
+
+-- sortPairsLength :: [Card] -> [Int]
+sortPairsLength = sort . map length . pairs
+
 isFourOfAKind :: [Card] -> Bool
-isFourOfAKind cards =  (sort . map length . pairs) cards == [1, 4]
+isFourOfAKind cards =  sortPairsLength cards == [1, 4]
 
 isFullHouse :: [Card] -> Bool
-isFullHouse cards =  (sort . map length . pairs) cards == [2, 3]
+isFullHouse cards =  sortPairsLength cards == [2, 3]
 
 isFlush       :: [Card] -> Bool
 isFlush cards =  all (== head suits) suits
@@ -116,7 +126,7 @@ isFlush cards =  all (== head suits) suits
 isStraight :: [Card] -> Bool
 isStraight cards = (and . g) (if minimum sorted == Two
                               && maximum sorted == Ace
-                                then (-1) : (init . map fromEnum) sorted
+                                then (pred . fromEnum) Two : (init . map fromEnum) sorted
                                 else map fromEnum sorted)
                    where f :: Card -> Rank
                          f (Card rank _) =  rank
@@ -126,18 +136,14 @@ isStraight cards = (and . g) (if minimum sorted == Two
                          g [_] = []
                          g (card1 : card2 : cards) =  (succ card1 == card2) : g (card2 : cards)
 
-pairs cards =  group sorted
-               where f (Card rank _) =  rank
-                     sorted =  sort $ map f cards
-
 isThreeOfAKind :: [Card] -> Bool
 isThreeOfAKind cards =  (maximum . map length . pairs) cards == 3
 
 isTwoPair :: [Card] -> Bool
-isTwoPair cards =  (sort . map length . pairs) cards == [1, 2, 2]
+isTwoPair cards =  sortPairsLength cards == [1, 2, 2]
 
 isOnePair :: [Card] -> Bool
-isOnePair cards =  (sort . map length . pairs) cards == [1, 1, 1, 2]
+isOnePair cards =  sortPairsLength cards == [1, 1, 1, 2]
 
 getCards         :: Int -> [Card] -> ([Card], [Card])
 getCards n cards =  (take n cards, drop n cards)
