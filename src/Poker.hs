@@ -88,16 +88,16 @@ instance Show Hand where
                 RoyalStraightFlush -> "Royal Straight Flush"
 
 checkHands   :: [Card] -> ([Card], Hand)
-checkHands c |  isRoyalStraightFlush c = (c, RoyalStraightFlush)
-             |  isStraightFlush      c = (c, StraightFlush)
-             |  isFourOfAKind        c = (c, FourOfAKind)
-             |  isFullHouse          c = (c, FullHouse)
-             |  isFlush              c = (c, Flush)
-             |  isStraight           c = (c, Straight)
-             |  isThreeOfAKind       c = (c, ThreeOfAKind)
-             |  isTwoPair            c = (c, TwoPair)
-             |  isOnePair            c = (c, OnePair)
-             |  otherwise              = (c, HighCards)
+checkHands cs |  isRoyalStraightFlush cs = (cs, RoyalStraightFlush)
+              |  isStraightFlush      cs = (cs, StraightFlush)
+              |  isFourOfAKind        cs = (cs, FourOfAKind)
+              |  isFullHouse          cs = (cs, FullHouse)
+              |  isFlush              cs = (cs, Flush)
+              |  isStraight           cs = (cs, Straight)
+              |  isThreeOfAKind       cs = (cs, ThreeOfAKind)
+              |  isTwoPair            cs = (cs, TwoPair)
+              |  isOnePair            cs = (cs, OnePair)
+              |  otherwise               = (cs, HighCards)
 
 isRoyalStraightFlush :: [Card] -> Bool
 isRoyalStraightFlush =  (&&) <$> isStraightFlush
