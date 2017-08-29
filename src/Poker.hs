@@ -27,6 +27,9 @@ data Rank = Two
           | Ace
             deriving (Eq, Ord, Enum)
 
+getRank :: Card -> Rank
+getRank (Card rank _) =  rank
+
 instance Show Rank where
     show r = case r of
                Jack  -> "J"
@@ -35,25 +38,26 @@ instance Show Rank where
                Ace   -> "A"
                _     -> (show . (+ 2) . fromEnum) r
 
-data Suit = Spade
-          | Heart
+data Suit = Club
           | Diamond
-          | Club
+          | Heart
+          | Spade
             deriving (Eq, Ord, Enum)
 
 instance Show Suit where
     show s = case s of
-               Spade   -> "♠ "
-               Heart   -> "♥ "
-               Diamond -> "♦ "
                Club    -> "♣ "
+               Diamond -> "♢ "
+               Heart   -> "♡ "
+               Spade   -> "♠ "
 
 initCards :: [Card]
-initCards =  do suit <- [Spade ..]
+initCards =  do suit <- [Club ..]
                 rank <- [Two .. Ace]
                 return $ Card rank suit
 
-data Hand = StraightFlush
+data Hand = RoyalStraightFlush
+          | StraightFlush
           | FourOfAKind
           | FullHouse
           | Flush
@@ -66,6 +70,7 @@ data Hand = StraightFlush
 
 instance Show Hand where
     show hand =  case hand of
+                   RoyalStraightFlush -> "Royal Straight Flush"
                    StraightFlush -> "Straight Flush"
                    FourOfAKind   -> "Four of a Kind"
                    FullHouse     -> "Full House"
@@ -77,24 +82,30 @@ instance Show Hand where
                    HighCards     -> "High Cards"
 
 checkHands :: [Card] -> Hand
-checkHands cards | isStraightFlush cards = StraightFlush
-                 | isFourOfAKind   cards = FourOfAKind
-                 | isFullHouse     cards = FullHouse
-                 | isFlush         cards = Flush
-                 | isStraight      cards = Straight
-                 | isThreeOfAKind  cards = ThreeOfAKind
-                 | isTwoPair       cards = TwoPair
-                 | isOnePair       cards = OnePair
-                 | otherwise             = HighCards
+checkHands cards | isRoyalStraightFlush cards = RoyalStraightFlush
+                 | isStraightFlush      cards = StraightFlush
+                 | isFourOfAKind        cards = FourOfAKind
+                 | isFullHouse          cards = FullHouse
+                 | isFlush              cards = Flush
+                 | isStraight           cards = Straight
+                 | isThreeOfAKind       cards = ThreeOfAKind
+                 | isTwoPair            cards = TwoPair
+                 | isOnePair            cards = OnePair
+                 | otherwise                  = HighCards
+
+isRoyalStraightFlush          :: [Card] -> Bool
+isRoyalStraightFlush cards =  isStraightFlush cards && (maximum ranks == Ace)
+                              where ranks :: [Rank]
+                                    ranks =  map getRank cards
 
 isStraightFlush :: [Card] -> Bool
 isStraightFlush cards =  isStraight cards && isFlush cards
 
 isFourOfAKind :: [Card] -> Bool
-isFourOfAKind cards =  (sort . map (length) . pairs) cards == [1, 4]
+isFourOfAKind cards =  (sort . map length . pairs) cards == [1, 4]
 
 isFullHouse :: [Card] -> Bool
-isFullHouse cards =  (sort . map (length) . pairs) cards == [2, 3]
+isFullHouse cards =  (sort . map length . pairs) cards == [2, 3]
 
 isFlush       :: [Card] -> Bool
 isFlush cards =  all (== head suits) suits
@@ -116,14 +127,18 @@ pairs cards =  group sorted
                      sorted =  sort $ map f cards
 
 isThreeOfAKind :: [Card] -> Bool
-isThreeOfAKind cards =  (last . sort . map (length) . pairs) cards == 3
+isThreeOfAKind cards =  (maximum . map length . pairs) cards == 3
 
 isTwoPair :: [Card] -> Bool
-isTwoPair cards =  (sort . map (length) . pairs) cards == [1, 2, 2]
+isTwoPair cards =  (sort . map length . pairs) cards == [1, 2, 2]
 
 isOnePair :: [Card] -> Bool
-isOnePair cards =  (sort . map (length) . pairs) cards == [1, 1, 1, 2]
+isOnePair cards =  (sort . map length . pairs) cards == [1, 1, 1, 2]
 
 getCards         :: Int -> [Card] -> ([Card], [Card])
 getCards n cards =  (take n cards, drop n cards)
 
+comb :: Int -> [a] -> [[a]]
+comb 0 _ = [[]]
+comb _ [] = []
+comb m (x:xs) = map (x:) (comb (m-1) xs) ++ comb m xs
