@@ -62,30 +62,30 @@ initCards =  do s <- [Club ..]
                 r <- [Two .. Ace]
                 return $ Card r s
 
-data Hand = RoyalStraightFlush
-          | StraightFlush
-          | FourOfAKind
-          | FullHouse
-          | Flush
-          | Straight
-          | ThreeOfAKind
-          | TwoPair
+data Hand = HighCards
           | OnePair
-          | HighCards
-            deriving (Eq, Ord)
+          | TwoPair
+          | ThreeOfAKind
+          | Straight
+          | Flush
+          | FullHouse
+          | FourOfAKind
+          | StraightFlush
+          | RoyalStraightFlush
+            deriving (Eq, Ord, Enum)
 
 instance Show Hand where
     show h =  case h of
+                HighCards          -> "High Cards"
+                OnePair            -> "One Pair"
+                TwoPair            -> "Two Pair"
+                ThreeOfAKind       -> "Three of a Kind"
+                Straight           -> "Straight"
+                Flush              -> "Flush"
+                FullHouse          -> "Full House"
+                FourOfAKind        -> "Four of a Kind"
+                StraightFlush      -> "Straight Flush"
                 RoyalStraightFlush -> "Royal Straight Flush"
-                StraightFlush -> "Straight Flush"
-                FourOfAKind   -> "Four of a Kind"
-                FullHouse     -> "Full House"
-                Flush         -> "Flush"
-                Straight      -> "Straight"
-                ThreeOfAKind  -> "Three of a Kind"
-                TwoPair       -> "Two Pair"
-                OnePair       -> "One Pair"
-                HighCards     -> "High Cards"
 
 checkHands       :: [Card] -> Hand
 checkHands cards |  isRoyalStraightFlush cards = RoyalStraightFlush
