@@ -14,8 +14,8 @@ instance Enum Card where
     fromEnum c = fromMaybe 0 $ elemIndex c (sort initCards)
     toEnum     = ((!!) . sort) initCards
 
-getSuit               :: Card -> Suit
-getSuit (Card _ suit) =  suit
+getSuit            :: Card -> Suit
+getSuit (Card _ s) =  s
 
 data Rank = Two
           | Three
@@ -32,8 +32,8 @@ data Rank = Two
           | Ace
             deriving (Eq, Ord, Enum)
 
-getRank               :: Card -> Rank
-getRank (Card rank _) =  rank
+getRank            :: Card -> Rank
+getRank (Card r _) =  r
 
 instance Show Rank where
     show r = case r of
@@ -58,9 +58,9 @@ instance Show Suit where
                Spade   -> "♠ "
 
 initCards :: [Card]
-initCards =  do suit <- [Club ..]
-                rank <- [Two .. Ace]
-                return $ Card rank suit
+initCards =  do s <- [Club ..]
+                r <- [Two .. Ace]
+                return $ Card r s
 
 data Hand = RoyalStraightFlush
           | StraightFlush
@@ -75,17 +75,17 @@ data Hand = RoyalStraightFlush
             deriving (Eq, Ord)
 
 instance Show Hand where
-    show hand =  case hand of
-                   RoyalStraightFlush -> "Royal Straight Flush"
-                   StraightFlush -> "Straight Flush"
-                   FourOfAKind   -> "Four of a Kind"
-                   FullHouse     -> "Full House"
-                   Flush         -> "Flush"
-                   Straight      -> "Straight"
-                   ThreeOfAKind  -> "Three of a Kind"
-                   TwoPair       -> "Two Pair"
-                   OnePair       -> "One Pair"
-                   HighCards     -> "High Cards"
+    show h =  case h of
+                RoyalStraightFlush -> "Royal Straight Flush"
+                StraightFlush -> "Straight Flush"
+                FourOfAKind   -> "Four of a Kind"
+                FullHouse     -> "Full House"
+                Flush         -> "Flush"
+                Straight      -> "Straight"
+                ThreeOfAKind  -> "Three of a Kind"
+                TwoPair       -> "Two Pair"
+                OnePair       -> "One Pair"
+                HighCards     -> "High Cards"
 
 checkHands       :: [Card] -> Hand
 checkHands cards |  isRoyalStraightFlush cards = RoyalStraightFlush
