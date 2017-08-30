@@ -127,21 +127,23 @@ isFlush :: [Card] -> Bool
 isFlush =  all =<< (. getSuit) . (==) . head . map getSuit
 -- isFlush cards =  all ((== head (map getSuit cards)) . getSuit) cards
 
-isStraight    :: [Card] -> Bool
-isStraight cs =  f cs (sortByRankEnum cs)
-                 `isInfixOf` (aceAsOne : map fromEnum [Two .. Ace])
-                 where toRankLs :: [Card] -> [Rank]
-                       toRankLs =  map getRank
-                       sortByRankEnum :: [Card] -> [Int]
-                       sortByRankEnum =  map fromEnum . sort . toRankLs
-                       aceAsOne = (pred . fromEnum) Two
-                       minMax :: (Foldable t, Ord b) => t b -> (b, b)
-                       minMax =  (,) <$> minimum
-                                     <*> maximum
-                       f    :: [Card] -> [Int] -> [Int]
-                       f xs =  if (minMax . toRankLs) xs == (Two, Ace)
-                                 then (aceAsOne :) . init
-                                 else id
+isStraight :: [Card] -> Bool
+isStraight =  flip isInfixOf (aceAsOne : map fromEnum [Two .. Ace])
+              . ap f sortByRankEnum
+-- isStraight =  (`isInfixOf` (aceAsOne : map fromEnum [Two .. Ace]))
+--               . ap f sortByRankEnum
+              where toRankLs :: [Card] -> [Rank]
+                    toRankLs =  map getRank
+                    sortByRankEnum :: [Card] -> [Int]
+                    sortByRankEnum =  map fromEnum . sort . toRankLs
+                    aceAsOne :: Int
+                    aceAsOne =  (pred . fromEnum) Two
+                    minMax :: (Foldable t, Ord b) => t b -> (b, b)
+                    minMax =  (,) <$> minimum <*> maximum
+                    f    :: [Card] -> [Int] -> [Int]
+                    f xs =  if (minMax . toRankLs) xs == (Two, Ace)
+                              then (aceAsOne :) . init
+                              else id
 
 isThreeOfAKind :: [Card] -> Bool
 isThreeOfAKind =  (== 3) . maximum . pairsLength
