@@ -128,8 +128,8 @@ isFlush =  all =<< (. getSuit) . (==) . head . map getSuit
 -- isFlush cards =  all ((== head (map getSuit cards)) . getSuit) cards
 
 isStraight    :: [Card] -> Bool
-isStraight cs =  f cs (sortByRankEnum cs) `isInfixOf`
-                 (aceAsOne : map fromEnum [Two .. Ace])
+isStraight cs =  f cs (sortByRankEnum cs)
+                 `isInfixOf` (aceAsOne : map fromEnum [Two .. Ace])
                  where toRankLs :: [Card] -> [Rank]
                        toRankLs =  map getRank
                        sortByRankEnum :: [Card] -> [Int]
