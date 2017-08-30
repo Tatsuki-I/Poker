@@ -2,6 +2,7 @@ module Poker where
 
 import Data.List
 import Data.Maybe
+import Control.Monad
 import System.Random.Shuffle
 
 data Card = Card Rank Suit
@@ -127,18 +128,20 @@ isFlush =  all =<< (. getSuit) . (==) . head . map getSuit
 -- isFlush cards =  all ((== head (map getSuit cards)) . getSuit) cards
 
 isStraight    :: [Card] -> Bool
-isStraight cs =  (and . f) (if (minimum . toRankLs) cs == Two
-                            && (maximum . toRankLs) cs == Ace
-                              then (pred . fromEnum) Two
-                                   : (init . sortByRankEnum) cs
-                              else sortByRankEnum cs)
+isStraight cs =  f cs (sortByRankEnum cs) `isInfixOf`
+                 (aceAsOne : map fromEnum [Two .. Ace])
                  where toRankLs :: [Card] -> [Rank]
                        toRankLs =  map getRank
                        sortByRankEnum :: [Card] -> [Int]
                        sortByRankEnum =  map fromEnum . sort . toRankLs
-                       f                :: [Int] -> [Bool]
-                       f [_]            =  []
-                       f (x1 : x2 : xs) =  (succ x1 == x2) : f (x2 : xs)
+                       aceAsOne = (pred . fromEnum) Two
+                       minMax :: (Foldable t, Ord b) => t b -> (b, b)
+                       minMax =  (,) <$> minimum
+                                     <*> maximum
+                       f    :: [Card] -> [Int] -> [Int]
+                       f xs =  if (minMax . toRankLs) xs == (Two, Ace)
+                                 then (aceAsOne :) . init
+                                 else id
 
 isThreeOfAKind :: [Card] -> Bool
 isThreeOfAKind =  (== 3) . maximum . pairsLength
