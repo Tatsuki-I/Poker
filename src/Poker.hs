@@ -128,10 +128,8 @@ isFlush =  all =<< (. getSuit) . (==) . head . map getSuit
 -- isFlush cards =  all ((== head (map getSuit cards)) . getSuit) cards
 
 isStraight :: [Card] -> Bool
-isStraight =  flip isInfixOf (aceAsOne : map fromEnum [Two .. Ace])
+isStraight =  (`isInfixOf` (aceAsOne : map fromEnum [Two .. Ace]))
               . ap f sortByRankEnum
--- isStraight =  (`isInfixOf` (aceAsOne : map fromEnum [Two .. Ace]))
---               . ap f sortByRankEnum
               where toRankLs :: [Card] -> [Rank]
                     toRankLs =  map getRank
                     sortByRankEnum :: [Card] -> [Int]
