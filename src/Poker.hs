@@ -33,7 +33,37 @@ data Rank = Two
           | Queen
           | King
           | Ace
-            deriving (Eq, Ord, Enum)
+            deriving (Eq, Ord) 
+
+instance Enum Rank where
+    fromEnum r =  case r of
+                    Two   -> 2
+                    Three -> 3
+                    Four  -> 4
+                    Five  -> 5
+                    Six   -> 6
+                    Seven -> 7
+                    Eight -> 8
+                    Nine  -> 9
+                    Ten   -> 10
+                    Jack  -> 11
+                    Queen -> 12
+                    King  -> 13
+                    Ace   -> 14
+    toEnum n =  case n of
+                  2  -> Two
+                  3  -> Three
+                  4  -> Four
+                  5  -> Five
+                  6  -> Six
+                  7  -> Seven
+                  8  -> Eight
+                  9  -> Nine
+                  10 -> Ten
+                  11 -> Jack
+                  12 -> Queen
+                  13 -> King
+                  14 -> Ace
 
 getRank            :: Card -> Rank
 getRank (Card r _) =  r
@@ -45,7 +75,7 @@ instance Show Rank where
                King  -> "K"
                Ace   -> "A"
                Ten   -> "T"
-               _     -> (show . (+ 2) . fromEnum) r
+               _     -> (show . fromEnum) r
 
 data Suit = Club
           | Diamond
@@ -163,20 +193,15 @@ isFlush =  all =<< (. getSuit) . (==) . head . map getSuit
 
 isStraight :: [Card] -> Bool
 isStraight =  (`isInfixOf` map fromEnum [Two .. Ace]) . ap f sortByRankEnum
--- isStraight =  (`isInfixOf` (aceAsOne : map fromEnum [Two .. Ace]))
---               . ap f sortByRankEnum
               where toRankLs :: [Card] -> [Rank]
                     toRankLs =  map getRank
                     sortByRankEnum :: [Card] -> [Int]
                     sortByRankEnum =  map fromEnum . sort . toRankLs
-                    -- aceAsOne :: Int
-                    -- aceAsOne =  (pred . fromEnum) Two
                     minMax :: (Foldable t, Ord b) => t b -> (b, b)
                     minMax =  (,) <$> minimum <*> maximum
                     f    :: [Card] -> [Int] -> [Int]
                     f xs =  if (minMax . toRankLs) xs == (Two, Ace)
                               then init
-                              -- then (aceAsOne :) . init
                               else id
 
 isThreeOfAKind :: [Card] -> Bool
