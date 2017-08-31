@@ -2,6 +2,7 @@ module Poker where
 
 import Data.List
 import Data.Maybe
+import Data.Function
 import Control.Monad
 import System.Random.Shuffle
 import Lib
@@ -124,7 +125,7 @@ parseHand h cs =  case h of
                   where ncs = sort cs
 
 sortByLn :: Foldable t => [t a] -> [t a]
-sortByLn = sortBy (\x y -> (compare (length y) (length x)))
+sortByLn =  reverse . sortBy (compare `on` length)
 
 isRoyalStraightFlush :: [Card] -> Bool
 isRoyalStraightFlush =  (&&) <$> isStraightFlush
