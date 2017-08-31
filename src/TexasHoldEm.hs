@@ -1,20 +1,21 @@
 module TexasHoldEm where
 
 import Poker
+import Data.List.Split
 
 data Table = Table { _talon     :: [Card]
-                   , _hole      :: [Card]
+                   , _holes     :: [[Card]]
                    , _community :: [Card]
                    } deriving (Show)
 
-initTable c =  Table { _talon = c
-                     , _hole = []
-                     , _community = [] }
+initTable n c =  Table { _talon = c
+                       , _holes = replicate n []
+                       , _community = [] }
 
-dealHole     :: Int -> Table -> Table
-dealHole n t =  t { _talon = newT
-                  , _hole = newH }
-                where (newH, newT) = splitAt n (_talon t)
+dealHoles     :: Int -> Table -> Table
+dealHoles n t =  t { _talon = newT
+                  , _holes = zipWith (++) (_holes t) (splitEvery n hcs) }
+                where (hcs, newT) = splitAt (n * (length $ _holes t)) (_talon t)
 
 dealCommunity     :: Int -> Table -> Table
 dealCommunity n t =  t { _talon = newT
@@ -22,6 +23,4 @@ dealCommunity n t =  t { _talon = newT
                      where (newC, newT) = splitAt n (_talon t)
 
 initTexas :: [Card] -> Table
-initTexas =  dealCommunity 5 . dealHole 2 . initTable
-
-
+initTexas =  dealCommunity 5 . dealHoles 2 . initTable 2

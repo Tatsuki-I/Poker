@@ -106,20 +106,25 @@ checkHands cs =  (maximumHand cs, map snd $ filter (\x -> fst x == maximumHand c
                  where allHands = sort . map checkHand . comb 5
                        maximumHand = maximum . map fst . allHands
 
-getHighestHand cs =  maximum $ checkHands cs
+getHighestHand    :: [Card] -> (Hands, [Int], [Card])
+getHighestHand cs =  maximum (map (uncurry parseHand . checkHand) (comb 5 cs))
 
-parseHand      :: Hands -> [Card] -> (Hands, [Int])
-parseHand h cs =  (,) h $ case h of
-                    RoyalStraightFlush -> [(fromEnum . getSuit . maximum) cs]
-                    StraightFlush      -> [(fromEnum . getRank . maximum) cs]
-                    FourOfAKind        -> (map (fromEnum . head) . sort . group . map getRank) cs
-                    FullHouse          -> (map head . sort . group . map (fromEnum . getRank)) cs
-                    Flush              -> (sortBy (flip compare) . map (fromEnum . getRank)) cs
-                    Straight           -> [(fromEnum . getRank . maximum) cs]
-                    ThreeOfAKind       -> ((:) <$> head <*> (reverse . tail)) ((map head . sort . group . map (fromEnum . getRank)) cs)
-                    TwoPair            -> (reverse . ((:) <$> last <*> init)) ((map head . sort . group . map (fromEnum . getRank)) cs)
-                    OnePair            -> ((:) <$> head <*> (reverse . tail)) ((map head . sort . group . map (fromEnum . getRank)) cs)
-                    _                  -> (sortBy (flip compare) . map (fromEnum . getRank)) cs
+parseHand      :: Hands -> [Card] -> (Hands, [Int], [Card])
+parseHand h cs =  case h of
+                    RoyalStraightFlush -> (h, [(fromEnum . getSuit . maximum) cs], ncs)
+                    StraightFlush      -> (h, [(fromEnum . getRank . maximum) cs], ncs)
+                    FourOfAKind        -> (h, (map (fromEnum . head) . sortByLn . group . sort . map getRank) cs, ncs)
+                    FullHouse          -> (h, (map head . sortByLn . group . sort . map (fromEnum . getRank)) cs, ncs)
+                    Flush              -> (h, (sortBy (flip compare) . map (fromEnum . getRank)) cs, ncs)
+                    Straight           -> (h, [(fromEnum . getRank . maximum) cs], ncs)
+                    ThreeOfAKind       -> (h, ((:) <$> head <*> (reverse . sort . tail)) ((map head . sortByLn . group . sort . map (fromEnum . getRank)) cs), ncs)
+                    TwoPair            -> (h, (reverse . ((:) <$> last <*> init)) ((map head . sortByLn . group . sort . map (fromEnum . getRank)) cs), ncs)
+                    OnePair            -> (h, ((:) <$> head <*> (reverse . sort . tail)) ((map head . sortByLn . group . sort . map (fromEnum . getRank)) cs), ncs)
+                    _                  -> (h, (sortBy (flip compare) . map (fromEnum . getRank)) cs, ncs)
+                  where ncs = sort cs
+
+sortByLn :: Foldable t => [t a] -> [t a]
+sortByLn = sortBy (\x y -> (compare (length y) (length x)))
 
 isRoyalStraightFlush :: [Card] -> Bool
 isRoyalStraightFlush =  (&&) <$> isStraightFlush

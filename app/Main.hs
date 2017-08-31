@@ -4,12 +4,23 @@ import Lib
 import Poker
 import TexasHoldEm
 import System.Random.Shuffle
-import Data.List
+-- import Data.List
 
 main :: IO ()
 main =  do sls <- shuffleM initCards
            print $ initTexas sls
-           print $ map checkHand $ comb 5 $ _hole (initTexas sls) ++ _community (initTexas sls)
+--           print $ map checkHand $ comb 5 $ head (_holes (initTexas sls)) ++ _community (initTexas sls)
+--           print $ map checkHand $ comb 5 $ last (_holes (initTexas sls)) ++ _community (initTexas sls)
+           print $ getHighestHand $ head (_holes (initTexas sls)) ++ _community (initTexas sls)
+           print $ getHighestHand $ last (_holes (initTexas sls)) ++ _community (initTexas sls)
+           putStrLn $ case compare 
+                             (getHighestHand $ head (_holes (initTexas sls)) ++ _community (initTexas sls))
+                             (getHighestHand $ last (_holes (initTexas sls)) ++ _community (initTexas sls))
+                             of
+                        LT -> "Player2 Win!!"
+                        GT -> "Player1 Win!!"
+                        EQ -> "Check!!"
+
 
            -- Should be [4,32,624,3744,5108,10200,54912,123552,1098240,1302540]
 
