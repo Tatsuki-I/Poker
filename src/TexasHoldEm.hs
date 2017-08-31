@@ -1,5 +1,8 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module TexasHoldEm where
 
+import Control.Lens
 import Poker
 import Data.List.Split
 
@@ -7,6 +10,7 @@ data Table = Table { _talon     :: [Card]
                    , _holes     :: [[Card]]
                    , _community :: [Card]
                    } deriving (Show)
+makeLenses ''Table
 
 initTable n c =  Table { _talon = c
                        , _holes = replicate n []
@@ -15,7 +19,7 @@ initTable n c =  Table { _talon = c
 dealHoles     :: Int -> Table -> Table
 dealHoles n t =  t { _talon = newT
                   , _holes = zipWith (++) (_holes t) (splitEvery n hcs) }
-                where (hcs, newT) = splitAt (n * (length $ _holes t)) (_talon t)
+                where (hcs, newT) = splitAt (n * length (_holes t)) (_talon t)
 
 dealCommunity     :: Int -> Table -> Table
 dealCommunity n t =  t { _talon = newT
