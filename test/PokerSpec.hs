@@ -1,6 +1,7 @@
 module PokerSpec (spec) where
 
 import Poker
+import Lib
 import Test.Hspec
 import Data.List
 
