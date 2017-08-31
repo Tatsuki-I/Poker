@@ -105,14 +105,12 @@ checkHand cs |  isRoyalStraightFlush cs = (RoyalStraightFlush, cs)
              |  isOnePair            cs = (OnePair,            cs)
              |  otherwise               = (HighCards,          cs)
 
-getHighestHand    :: [Card] -> (HandRank, [Card])
---getHighestHand    :: [Card] -> (Hands, [Int], [Card])
-getHighestHand cs =  maximum (map (uncurry parseHand . checkHand) (comb 5 cs))
+getHighestHand :: [Card] -> (HandRank, [Card])
+getHighestHand =  maximum . map (uncurry parseHand . checkHand) . comb 5
 
 
 
 parseHand      :: Hands -> [Card] -> (HandRank, [Card])
--- parseHand      :: Hands -> [Card] -> (Hands, [Int], [Card])
 parseHand h cs =  case h of
                     RoyalStraightFlush -> (HandRank h [(fromEnum . getSuit . maximum) cs], ncs)
                     StraightFlush      -> (HandRank h [(getRankEnum . maximum) cs], ncs)
