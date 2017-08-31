@@ -14,12 +14,12 @@ main =  do sls <- shuffleM initCards
            print $ getHighestHand $ head (_holes (initTexas sls)) ++ _community (initTexas sls)
            print $ getHighestHand $ last (_holes (initTexas sls)) ++ _community (initTexas sls)
            putStrLn $ case compare 
-                             (getHighestHand $ head (_holes (initTexas sls)) ++ _community (initTexas sls))
-                             (getHighestHand $ last (_holes (initTexas sls)) ++ _community (initTexas sls))
+                             (fst $ getHighestHand $ head (_holes (initTexas sls)) ++ _community (initTexas sls))
+                             (fst $ getHighestHand $ last (_holes (initTexas sls)) ++ _community (initTexas sls))
                              of
+                        EQ -> "Check!!"
                         LT -> "Player2 Win!!"
                         GT -> "Player1 Win!!"
-                        EQ -> "Check!!"
 
 
            -- Should be [4,32,624,3744,5108,10200,54912,123552,1098240,1302540]
