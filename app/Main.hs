@@ -11,11 +11,11 @@ main =  do sls <- shuffleM initCards
            print $ initTexas sls
 --           print $ map checkHand $ comb 5 $ head (_holes (initTexas sls)) ++ _community (initTexas sls)
 --           print $ map checkHand $ comb 5 $ last (_holes (initTexas sls)) ++ _community (initTexas sls)
-           print $ getHighestHand $ head (_holes (initTexas sls)) ++ _community (initTexas sls)
-           print $ getHighestHand $ last (_holes (initTexas sls)) ++ _community (initTexas sls)
+           print $ getHighestHand $ head (_hole (initTexas sls)) ++ _community (initTexas sls)
+           print $ getHighestHand $ last (_hole (initTexas sls)) ++ _community (initTexas sls)
            putStrLn $ case compare 
-                             (fst $ getHighestHand $ head (_holes (initTexas sls)) ++ _community (initTexas sls))
-                             (fst $ getHighestHand $ last (_holes (initTexas sls)) ++ _community (initTexas sls))
+                             (fst $ getHighestHand $ head (_hole (initTexas sls)) ++ _community (initTexas sls))
+                             (fst $ getHighestHand $ last (_hole (initTexas sls)) ++ _community (initTexas sls))
                              of
                         EQ -> "Check!!"
                         LT -> "Player2 Win!!"
