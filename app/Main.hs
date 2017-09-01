@@ -1,25 +1,24 @@
 module Main where
 
-import Lib
 import Poker
 import TexasHoldEm
+import Control.Lens
 import System.Random.Shuffle
 -- import Data.List
 
 main :: IO ()
 main =  do sls <- shuffleM initCards
-           print $ initTexas sls
---           print $ map checkHand $ comb 5 $ head (_holes (initTexas sls)) ++ _community (initTexas sls)
---           print $ map checkHand $ comb 5 $ last (_holes (initTexas sls)) ++ _community (initTexas sls)
-           print $ getHighestHand $ head (_hole (initTexas sls)) ++ _community (initTexas sls)
-           print $ getHighestHand $ last (_hole (initTexas sls)) ++ _community (initTexas sls)
+           print $ initTexas ps sls
+           print $ getHighestHand $ ((head ((initTexas ps sls) ^. players)) ^. hole) ++ _community (initTexas ps sls)
+           print $ getHighestHand $ ((last ((initTexas ps sls) ^. players)) ^. hole) ++ _community (initTexas ps sls)
            putStrLn $ case compare 
-                             (fst $ getHighestHand $ head (_hole (initTexas sls)) ++ _community (initTexas sls))
-                             (fst $ getHighestHand $ last (_hole (initTexas sls)) ++ _community (initTexas sls))
+                             (fst $ getHighestHand $ ((head ((initTexas ps sls) ^. players)) ^. hole) ++ _community (initTexas ps sls))
+                             (fst $ getHighestHand $ ((last ((initTexas ps sls) ^. players)) ^. hole) ++ _community (initTexas ps sls))
                              of
                         EQ -> "Check!!"
-                        LT -> "Player2 Win!!"
-                        GT -> "Player1 Win!!"
+                        LT -> ((last ps) ^. name) ++ " Win!!"
+                        GT -> ((head ps) ^. name) ++ " Win!!"
+            where ps = ([initPlayer "Player1", initPlayer "Player2"])
 
 
            -- Should be [4,32,624,3744,5108,10200,54912,123552,1098240,1302540]

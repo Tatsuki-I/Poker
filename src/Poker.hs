@@ -4,7 +4,6 @@ import Data.List
 import Data.Maybe
 import Data.Function
 import Control.Monad
-import System.Random.Shuffle
 import Lib
 
 data Card = Card Rank Suit
