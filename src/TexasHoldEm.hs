@@ -12,12 +12,13 @@ data Table = Table { _talon     :: [Card]
                    , _community :: [Card]
                    } deriving (Show)
 
-data Player = Player { _name   :: String
-                     , _chip   :: Chip
-                     , _pot    :: Chip
-                     , _hole   :: [Card]
-                     , _folded :: Bool
-                     , _pos    :: Position
+data Player = Player { _name    :: String
+                     , _chip    :: Chip
+                     , _pot     :: Chip
+                     , _hole    :: [Card]
+                     , _folded  :: Bool
+                     , _pos     :: Position
+                     , _ranking :: Word
                      } deriving (Show)
 
 type Position = Int
@@ -32,12 +33,13 @@ initTable ps cs =  Table { _talon     = cs
                          , _community = [] }
 
 initPlayer     :: String -> Player
-initPlayer str =  Player { _name   = str
-                         , _chip   = 2000
-                         , _pot    = 0
-                         , _hole   = []
-                         , _folded = False
-                         , _pos    = 0 }
+initPlayer str =  Player { _name    = str
+                         , _chip    = 2000
+                         , _pot     = 0
+                         , _hole    = []
+                         , _folded  = False
+                         , _pos     = 0
+                         , _ranking = 0 }
 
 dealHoles     :: Int -> Table -> Table
 dealHoles n t =  t & talon    .~ nt
